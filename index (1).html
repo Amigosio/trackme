@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life OS — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: rgba(255,255,255,0.07);
+    --accent: #c8f25a;
+    --accent2: #7b61ff;
+    --accent3: #ff6b6b;
+    --text: #f0f0f5;
+    --muted: #6b6b80;
+    --card-bg: rgba(255,255,255,0.03);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Animated background */
+  .bg-canvas {
+    position: fixed; inset: 0; z-index: 0;
+    overflow: hidden;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .orb1 { width:500px;height:500px; background:#7b61ff; top:-100px; left:-100px; animation-delay:0s; }
+  .orb2 { width:400px;height:400px; background:#c8f25a; bottom:-100px; right:-50px; animation-delay:-4s; }
+  .orb3 { width:300px;height:300px; background:#ff6b6b; top:50%; left:50%; animation-delay:-8s; }
+  @keyframes drift {
+    from { transform: translate(0,0) scale(1); }
+    to { transform: translate(40px,30px) scale(1.1); }
+  }
+
+  /* Grid lines */
+  .grid-overlay {
+    position: fixed; inset: 0; z-index: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .login-wrapper {
+    position: relative; z-index: 10;
+    width: 100%; max-width: 460px;
+    padding: 20px;
+  }
+
+  .brand {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .brand-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(200,242,90,0.08);
+    border: 1px solid rgba(200,242,90,0.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px; letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .brand-badge::before {
+    content:''; width:6px;height:6px; border-radius:50%;
+    background: var(--accent); animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  .brand h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 52px; font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .brand h1 span { color: var(--accent); }
+  .brand p {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px;
+    animation: fadeUp 0.6s ease 0.15s both;
+    position: relative;
+    overflow: hidden;
+  }
+  .login-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,242,90,0.4), transparent);
+  }
+
+  .tab-row {
+    display: flex; gap: 4px;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 32px;
+  }
+  .tab-btn {
+    flex: 1; padding: 10px;
+    border: none; background: none;
+    color: var(--muted); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    border-radius: 10px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #0a0a0f;
+  }
+
+  .form-group { margin-bottom: 20px; }
+  .form-group label {
+    display: block;
+    font-size: 12px; font-weight: 500;
+    color: var(--muted); letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .form-group input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-group input:focus {
+    border-color: rgba(200,242,90,0.4);
+    box-shadow: 0 0 0 3px rgba(200,242,90,0.08);
+  }
+  .form-group input::placeholder { color: var(--muted); }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(200,242,90,0.3);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  .divider {
+    text-align: center; color: var(--muted);
+    font-size: 13px; margin: 24px 0;
+    position: relative;
+  }
+  .divider::before, .divider::after {
+    content:''; position:absolute; top:50%; width:40%;
+    height:1px; background: var(--border);
+  }
+  .divider::before { left:0; } .divider::after { right:0; }
+
+  .demo-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .demo-btn:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.03); }
+
+  .footer-note {
+    text-align: center; margin-top: 24px;
+    font-size: 13px; color: var(--muted);
+    animation: fadeUp 0.6s ease 0.3s both;
+  }
+
+  .features-row {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 12px; margin-top: 32px;
+    animation: fadeUp 0.6s ease 0.45s both;
+  }
+  .feature-chip {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .feature-chip .icon { font-size: 20px; margin-bottom: 6px; }
+  .feature-chip p { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(20px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+
+  .error-msg {
+    color: var(--accent3);
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+<div class="bg-canvas">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+<div class="grid-overlay"></div>
+
+<div class="login-wrapper">
+  <div class="brand">
+    <div class="brand-badge">✦ Your Personal OS</div>
+    <h1>Life <span>OS</span></h1>
+    <p>Finance, goals & habits — beautifully unified.</p>
+  </div>
+
+  <div class="login-card">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn" onclick="switchTab('signup')">Create Account</button>
+    </div>
+
+    <!-- Login Form -->
+    <div class="form-panel active" id="login-panel">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="login-email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="••••••••" />
+      </div>
+      <p class="error-msg" id="login-error">Invalid credentials. Try demo@lifeos.app / demo123</p>
+      <button class="btn-primary" onclick="handleLogin()">Enter Life OS →</button>
+      <div class="divider">or</div>
+      <button class="demo-btn" onclick="demoLogin()">⚡ Continue with Demo Account</button>
+    </div>
+
+    <!-- Signup Form -->
+    <div class="form-panel" id="signup-panel">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="signup-name" placeholder="Your name" />
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="signup-email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signup-pass" placeholder="Min 6 characters" />
+      </div>
+      <p class="error-msg" id="signup-error">Please fill all fields correctly.</p>
+      <button class="btn-primary" onclick="handleSignup()">Create My OS →</button>
+    </div>
+  </div>
+
+  <div class="features-row">
+    <div class="feature-chip">
+      <div class="icon">💰</div>
+      <p>Smart Finance Tracking</p>
+    </div>
+    <div class="feature-chip">
+      <div class="icon">🎯</div>
+      <p>Goal & Habit Engine</p>
+    </div>
+    <div class="feature-chip">
+      <div class="icon">📊</div>
+      <p>AI-style Reports</p>
+    </div>
+  </div>
+
+  <p class="footer-note">Your data stays local. No servers. No tracking. 🔒</p>
+</div>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='signup'));
+  });
+  document.getElementById('login-panel').classList.toggle('active', tab==='login');
+  document.getElementById('signup-panel').classList.toggle('active', tab==='signup');
+}
+
+function handleLogin() {
+  const email = document.getElementById('login-email').value;
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+
+  // Check stored users
+  const users = JSON.parse(localStorage.getItem('lifeos_users') || '[]');
+  const user = users.find(u => u.email === email && u.password === pass);
+
+  if (user || (email === 'demo@lifeos.app' && pass === 'demo123')) {
+    const name = user ? user.name : 'Demo User';
+    localStorage.setItem('lifeos_current', JSON.stringify({ email, name }));
+    err.style.display = 'none';
+    document.querySelector('.btn-primary').textContent = 'Loading…';
+    setTimeout(() => window.location.href = 'dashboard.html', 600);
+  } else {
+    err.style.display = 'block';
+  }
+}
+
+function handleSignup() {
+  const name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pass = document.getElementById('signup-pass').value;
+  const err = document.getElementById('signup-error');
+
+  if (!name || !email || pass.length < 6) {
+    err.style.display = 'block'; return;
+  }
+  const users = JSON.parse(localStorage.getItem('lifeos_users') || '[]');
+  users.push({ name, email, password: pass });
+  localStorage.setItem('lifeos_users', JSON.stringify(users));
+  localStorage.setItem('lifeos_current', JSON.stringify({ email, name }));
+  err.style.display = 'none';
+  setTimeout(() => window.location.href = 'dashboard.html', 600);
+}
+
+function demoLogin() {
+  localStorage.setItem('lifeos_current', JSON.stringify({ email: 'demo@lifeos.app', name: 'Demo User' }));
+  // Pre-seed demo data
+  if (!localStorage.getItem('lifeos_expenses')) {
+    localStorage.setItem('lifeos_expenses', JSON.stringify([
+      { id:1, desc:'Salary', amount:85000, type:'income', category:'Work', date:'2025-04-01' },
+      { id:2, desc:'Freelance', amount:15000, type:'income', category:'Work', date:'2025-04-05' },
+      { id:3, desc:'Rent', amount:22000, type:'expense', category:'Housing', date:'2025-04-01' },
+      { id:4, desc:'Groceries', amount:4500, type:'expense', category:'Food', date:'2025-04-03' },
+      { id:5, desc:'Netflix', amount:649, type:'expense', category:'Entertainment', date:'2025-04-04' },
+      { id:6, desc:'Gym', amount:2000, type:'expense', category:'Health', date:'2025-04-02' },
+      { id:7, desc:'Restaurant', amount:1800, type:'expense', category:'Food', date:'2025-04-07' },
+      { id:8, desc:'Transport', amount:3200, type:'expense', category:'Transport', date:'2025-04-06' },
+    ]));
+  }
+  if (!localStorage.getItem('lifeos_goals')) {
+    localStorage.setItem('lifeos_goals', JSON.stringify([
+      { id:1, title:'Emergency Fund', target:200000, current:85000, deadline:'2025-12-31', color:'#c8f25a', emoji:'🛡️' },
+      { id:2, title:'Vacation to Bali', target:80000, current:32000, deadline:'2025-10-01', color:'#7b61ff', emoji:'✈️' },
+      { id:3, title:'New Laptop', target:120000, current:120000, deadline:'2025-06-30', color:'#ff6b6b', emoji:'💻' },
+    ]));
+  }
+  if (!localStorage.getItem('lifeos_habits')) {
+    localStorage.setItem('lifeos_habits', JSON.stringify([
+      { id:1, name:'Morning Workout', emoji:'💪', streak:12, target:30, log:[] },
+      { id:2, name:'Read 20 mins', emoji:'📚', streak:5, target:21, log:[] },
+      { id:3, name:'Drink 2L Water', emoji:'💧', streak:8, target:30, log:[] },
+      { id:4, name:'Meditate', emoji:'🧘', streak:3, target:14, log:[] },
+    ]));
+  }
+  window.location.href = 'dashboard.html';
+}
+
+// Allow Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const panel = document.querySelector('.form-panel.active');
+    if (panel.id === 'login-panel') handleLogin();
+    else handleSignup();
+  }
+});
+</script>
+</body>
+</html>
